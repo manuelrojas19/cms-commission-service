@@ -1,6 +1,8 @@
 package com.manuelr.microservices.cms.commissionservice.service.impl;
 
-import com.manuelr.microservices.cms.commissionservice.dto.EmployeeDto;
+import com.manuelr.cms.commons.dto.EmployeeDto;
+import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
+import com.manuelr.microservices.cms.commissionservice.exception.NotFoundException;
 import com.manuelr.microservices.cms.commissionservice.service.EmployeeService;
 import com.manuelr.microservices.cms.commissionservice.web.proxy.EmployeeServiceFeignClient;
 import feign.FeignException;
@@ -17,17 +19,17 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeServiceFeignClient employeeServiceFeignClient;
 
     @Override
-    public EmployeeDto findEmployeeById(Long id) {
-        EmployeeDto employeeDto = null;
+    public EmployeeDto findById(Long id) {
+        EmployeeDto employeeDto;
         try {
             log.info("Calling Employee Service ---> employeeId {}", id);
-            ResponseEntity<EmployeeDto> responseEntity = employeeServiceFeignClient.findEmployeeById(id);
+            ResponseEntity<EmployeeDto> responseEntity = employeeServiceFeignClient.findById(id);
             log.debug("Employee --> {}", responseEntity.getBody());
             employeeDto = responseEntity.getBody();
         } catch (FeignException e) {
-            log.info("Employee was not found");
             if (!(e.status() == HttpStatus.NOT_FOUND.value()))
-                throw new RuntimeException(e);
+                throw new BadRequestException(e.getMessage());
+            throw new NotFoundException("Employee was not found", id.toString());
         }
         return employeeDto;
     }

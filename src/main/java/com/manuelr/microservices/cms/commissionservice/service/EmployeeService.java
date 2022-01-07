@@ -1,7 +1,7 @@
 package com.manuelr.microservices.cms.commissionservice.service;
 
-import com.manuelr.microservices.cms.commissionservice.dto.EmployeeDto;
+import com.manuelr.cms.commons.dto.EmployeeDto;
 
 public interface EmployeeService {
-    EmployeeDto findEmployeeById(Long id);
+    EmployeeDto findById(Long id);
 }

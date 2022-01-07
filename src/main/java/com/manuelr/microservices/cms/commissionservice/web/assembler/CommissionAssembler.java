@@ -2,15 +2,14 @@ package com.manuelr.microservices.cms.commissionservice.web.assembler;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import com.manuelr.cms.commons.dto.CommissionDto;
 import com.manuelr.microservices.cms.commissionservice.controller.CommissionController;
-import com.manuelr.microservices.cms.commissionservice.dto.CommissionDto;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
 import com.manuelr.microservices.cms.commissionservice.web.mapper.CommissionMapper;
 import com.manuelr.microservices.cms.commissionservice.web.proxy.EmployeeServiceFeignClient;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,10 +20,11 @@ public class CommissionAssembler implements RepresentationModelAssembler<Commiss
     @Override
     public @NonNull CommissionDto toModel(@NonNull Commission entity) {
         CommissionDto commissionDto = commissionMapper.commissionToCommissionDto(entity);
-        commissionDto.add(WebMvcLinkBuilder.linkTo(methodOn(CommissionController.class).findCommissionById(entity.getId())).withSelfRel());
-        commissionDto.add(linkTo(methodOn(CommissionController.class).findAllCommissions(0, 8)).withRel("commissions"));
-        commissionDto.add(linkTo(methodOn(CommissionController.class).deleteCommission(entity.getId())).withRel("delete"));
-        commissionDto.add(linkTo(methodOn(EmployeeServiceFeignClient.class).findEmployeeById(entity.getEmployeeId())).withRel("employee"));
+        commissionDto.add(linkTo(methodOn(CommissionController.class).findById(entity.getId())).withSelfRel());
+        commissionDto.add(linkTo(methodOn(CommissionController.class).findAll(0, 8)).withRel("commissions"));
+        commissionDto.add(linkTo(methodOn(CommissionController.class).update(commissionDto, entity.getId())).withRel("update"));
+        commissionDto.add(linkTo(methodOn(CommissionController.class).delete(entity.getId())).withRel("delete"));
+        commissionDto.add(linkTo(methodOn(EmployeeServiceFeignClient.class).findById(entity.getEmployeeId())).withRel("commissionEmployee"));
         return commissionDto;
     }
 
