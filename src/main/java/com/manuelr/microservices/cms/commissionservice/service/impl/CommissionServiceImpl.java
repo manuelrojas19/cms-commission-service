@@ -1,6 +1,7 @@
 package com.manuelr.microservices.cms.commissionservice.service.impl;
 
 import com.manuelr.cms.commons.dto.CommissionDto;
+import com.manuelr.cms.commons.dto.EmployeeDto;
 import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
 import com.manuelr.microservices.cms.commissionservice.repository.CommissionRepository;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
@@ -46,6 +47,15 @@ public class CommissionServiceImpl implements CommissionService {
     public CollectionModel<CommissionDto> findAllByEmployeeId(Long employeeId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Commission> commissions = commissionRepository.findAllByEmployeeId(employeeId, pageable);
+        return pagedResourcesAssembler.toModel(commissions, commissionAssembler);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CollectionModel<CommissionDto> findAllByCurrentEmployeeUser(Long userId, Integer page, Integer size) {
+        EmployeeDto currentEmployeeUser = employeeService.findCurrentEmployeeUser();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Commission> commissions = commissionRepository.findAllByEmployeeId(currentEmployeeUser.getId(), pageable);
         return pagedResourcesAssembler.toModel(commissions, commissionAssembler);
     }
 

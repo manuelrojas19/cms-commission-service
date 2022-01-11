@@ -4,4 +4,5 @@ import com.manuelr.cms.commons.dto.EmployeeDto;
 
 public interface EmployeeService {
     EmployeeDto findById(Long id);
+    EmployeeDto findCurrentEmployeeUser();
 }

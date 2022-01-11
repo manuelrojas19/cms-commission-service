@@ -34,4 +34,21 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeDto;
     }
 
+    @Override
+    public EmployeeDto findCurrentEmployeeUser() {
+        EmployeeDto employeeDto;
+        try {
+            log.info("Calling Employee Service ---> currentEmployee ");
+            ResponseEntity<EmployeeDto> responseEntity = employeeServiceFeignClient.findCurrentEmployeeUser();
+            log.debug("Employee --> {}", responseEntity.getBody());
+            employeeDto = responseEntity.getBody();
+        } catch (FeignException e) {
+            if (!(e.status() == HttpStatus.NOT_FOUND.value()))
+                throw new BadRequestException(e.getMessage());
+            throw new NotFoundException("Employee was not found", null);
+        }
+        return employeeDto;
+    }
+
+
 }
