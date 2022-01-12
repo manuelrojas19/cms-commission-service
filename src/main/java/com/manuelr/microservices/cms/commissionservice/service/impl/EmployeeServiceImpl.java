@@ -4,7 +4,7 @@ import com.manuelr.cms.commons.dto.EmployeeDto;
 import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
 import com.manuelr.microservices.cms.commissionservice.exception.NotFoundException;
 import com.manuelr.microservices.cms.commissionservice.service.EmployeeService;
-import com.manuelr.microservices.cms.commissionservice.web.proxy.EmployeeServiceFeignClient;
+import com.manuelr.microservices.cms.commissionservice.proxy.EmployeeServiceFeignClient;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -3,5 +3,11 @@ spring:
     name: commissions-service
   zipkin:
     base-url: http://localhost:9411
-
+authentication-dev:
+  auth:
+    tokenSecret: myTokenSecret
+    tokenExpirationMsec: 3600000 #1 hour
+    refreshTokenExpirationMsec: 77760000000 #90 days
+    accessTokenCookieName: accessToken
+    refreshTokenCookieName: refreshToken
 

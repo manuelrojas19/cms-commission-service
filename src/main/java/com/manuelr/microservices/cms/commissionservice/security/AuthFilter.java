@@ -1,6 +1,11 @@
 package com.manuelr.microservices.cms.commissionservice.security;
 
+import com.manuelr.cms.commons.enums.Role;
+import com.manuelr.cms.commons.utils.SecurityCipher;
+import com.manuelr.microservices.cms.commissionservice.util.JwtTokenUtil;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,26 +22,31 @@ import java.util.Collections;
 import java.util.Objects;
 
 @Slf4j
-public class AuthenticationFilter extends OncePerRequestFilter {
+public class AuthFilter extends OncePerRequestFilter {
+    private static final String AUTH_HEADER_NAME = "X-Auth-Token";
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (Objects.isNull(request.getHeader("X-Auth-UserId"))
-                || Objects.isNull(request.getHeader("X-Auth-UserRole"))) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+        if (Objects.isNull(request.getHeader(AUTH_HEADER_NAME))) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
 
-        log.info("Role ---> {}",request.getHeader("X-Auth-UserRole"));
+        log.info("Encrypted Token ---> {}", request.getHeader(AUTH_HEADER_NAME));
+        String token = SecurityCipher.decrypt(request.getHeader(AUTH_HEADER_NAME));
+        String userName = jwtTokenUtil.getUsernameFromToken(token);
+        Role role = jwtTokenUtil.getRoleFromToken(token);
 
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(request.getHeader("X-Auth-UserId"), null,
-                        Collections.singletonList(new SimpleGrantedAuthority(request.getHeader("X-Auth-UserRole"))));
+                new UsernamePasswordAuthenticationToken(userName, null,
+                        Collections.singletonList(new SimpleGrantedAuthority(role.name())));
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("Authentication object ---> {}", authentication);
 
         filterChain.doFilter(request, response);
     }

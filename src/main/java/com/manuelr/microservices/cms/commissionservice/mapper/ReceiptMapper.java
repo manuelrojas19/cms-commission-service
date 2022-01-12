@@ -1,4 +1,4 @@
-package com.manuelr.microservices.cms.commissionservice.web.mapper;
+package com.manuelr.microservices.cms.commissionservice.mapper;
 
 import com.manuelr.microservices.cms.commissionservice.dto.ReceiptDto;
 import com.manuelr.microservices.cms.commissionservice.entity.Receipt;

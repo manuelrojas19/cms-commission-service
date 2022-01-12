@@ -1,6 +1,5 @@
 package com.manuelr.microservices.cms.commissionservice.service.impl;
 
-import com.manuelr.cms.commons.dto.CommissionDto;
 import com.manuelr.microservices.cms.commissionservice.dto.ReceiptDto;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
 import com.manuelr.microservices.cms.commissionservice.entity.Receipt;
@@ -8,8 +7,8 @@ import com.manuelr.microservices.cms.commissionservice.exception.NotFoundExcepti
 import com.manuelr.microservices.cms.commissionservice.repository.CommissionRepository;
 import com.manuelr.microservices.cms.commissionservice.repository.ReceiptRepository;
 import com.manuelr.microservices.cms.commissionservice.service.ReceiptService;
-import com.manuelr.microservices.cms.commissionservice.web.assembler.ReceiptAssembler;
-import com.manuelr.microservices.cms.commissionservice.web.mapper.ReceiptMapper;
+import com.manuelr.microservices.cms.commissionservice.assembler.ReceiptAssembler;
+import com.manuelr.microservices.cms.commissionservice.mapper.ReceiptMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

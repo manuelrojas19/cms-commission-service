@@ -15,6 +15,6 @@ public class MyRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        template.header("X-Auth-UserId", request.getHeader("X-Auth-UserId"));
+        template.header("X-Auth-Token", request.getHeader("X-Auth-Token"));
     }
 }

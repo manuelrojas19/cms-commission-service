@@ -1,10 +1,8 @@
-package com.manuelr.microservices.cms.commissionservice.web.assembler;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+package com.manuelr.microservices.cms.commissionservice.assembler;
 
 import com.manuelr.microservices.cms.commissionservice.dto.ReceiptDto;
 import com.manuelr.microservices.cms.commissionservice.entity.Receipt;
-import com.manuelr.microservices.cms.commissionservice.web.mapper.ReceiptMapper;
+import com.manuelr.microservices.cms.commissionservice.mapper.ReceiptMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;

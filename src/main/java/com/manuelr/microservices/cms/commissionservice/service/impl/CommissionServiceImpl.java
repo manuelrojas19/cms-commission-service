@@ -8,8 +8,8 @@ import com.manuelr.microservices.cms.commissionservice.entity.Commission;
 import com.manuelr.microservices.cms.commissionservice.exception.NotFoundException;
 import com.manuelr.microservices.cms.commissionservice.service.EmployeeService;
 import com.manuelr.microservices.cms.commissionservice.service.CommissionService;
-import com.manuelr.microservices.cms.commissionservice.web.assembler.CommissionAssembler;
-import com.manuelr.microservices.cms.commissionservice.web.mapper.CommissionMapper;
+import com.manuelr.microservices.cms.commissionservice.assembler.CommissionAssembler;
+import com.manuelr.microservices.cms.commissionservice.mapper.CommissionMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +53,7 @@ public class CommissionServiceImpl implements CommissionService {
 
     @Override
     @Transactional(readOnly = true)
-    public CollectionModel<CommissionDto> findAllByCurrentEmployeeUser(Long userId, Integer page, Integer size) {
+    public CollectionModel<CommissionDto> findAllByCurrentEmployeeUser(Integer page, Integer size) {
         EmployeeDto currentEmployeeUser = employeeService.findCurrentEmployeeUser();
         Pageable pageable = PageRequest.of(page, size);
         Page<Commission> commissions = commissionRepository.findAllByEmployeeId(currentEmployeeUser.getId(), pageable);

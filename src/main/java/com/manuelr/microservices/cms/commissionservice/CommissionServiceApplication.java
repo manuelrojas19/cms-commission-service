@@ -7,8 +7,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
-@EnableFeignClients
 @EnableEurekaClient
+@EnableFeignClients
 @EnableMongoAuditing
 @EnableSpringDataWebSupport
 @SpringBootApplication
