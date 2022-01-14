@@ -1,7 +1,7 @@
 package com.manuelr.microservices.cms.commissionservice.security;
 
-import com.manuelr.cms.commons.enums.Role;
-import com.manuelr.cms.commons.utils.SecurityCipher;
+import com.manuelr.cms.commons.security.SecurityCipher;
+import com.manuelr.cms.commons.security.UserData;
 import com.manuelr.microservices.cms.commissionservice.util.JwtTokenUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +36,17 @@ public class AuthFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
-
         log.info("Encrypted Token ---> {}", request.getHeader(AUTH_HEADER_NAME));
         String token = SecurityCipher.decrypt(request.getHeader(AUTH_HEADER_NAME));
-        String userName = jwtTokenUtil.getUsernameFromToken(token);
-        Role role = jwtTokenUtil.getRoleFromToken(token);
+
+        String username = jwtTokenUtil.getUsernameFromToken(token);
+
+        UserData userData = jwtTokenUtil.getUserDataFromToken(token);
+        userData.setEmail(username);
 
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(userName, null,
-                        Collections.singletonList(new SimpleGrantedAuthority(role.name())));
+                new UsernamePasswordAuthenticationToken(userData, null,
+                        Collections.singletonList(new SimpleGrantedAuthority(userData.getRole().name())));
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

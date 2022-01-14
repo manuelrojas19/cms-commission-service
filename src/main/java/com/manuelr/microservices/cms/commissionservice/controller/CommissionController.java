@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,12 @@ public class CommissionController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/commissions/{id}")
+    public ResponseEntity<CommissionDto> findById(@PathVariable String id) {
+        CommissionDto response = commissionService.findById(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @PreAuthorize("hasAuthority('EMPLOYEE')")
     @GetMapping("/employees/current/commissions")
     public ResponseEntity<CollectionModel<CommissionDto>> findAllByCurrentEmployee(
@@ -50,12 +57,6 @@ public class CommissionController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
-    @GetMapping("/commissions/{id}")
-    public ResponseEntity<CommissionDto> findById(@PathVariable String id) {
-        CommissionDto response = commissionService.findById(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
     @PostMapping("/commissions")
     public ResponseEntity<CommissionDto> create(@Validated @RequestBody CommissionDto request) {

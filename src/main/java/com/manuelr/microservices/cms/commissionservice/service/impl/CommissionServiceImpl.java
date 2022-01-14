@@ -2,6 +2,8 @@ package com.manuelr.microservices.cms.commissionservice.service.impl;
 
 import com.manuelr.cms.commons.dto.CommissionDto;
 import com.manuelr.cms.commons.dto.EmployeeDto;
+import com.manuelr.cms.commons.enums.Role;
+import com.manuelr.cms.commons.security.UserData;
 import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
 import com.manuelr.microservices.cms.commissionservice.repository.CommissionRepository;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,9 +57,9 @@ public class CommissionServiceImpl implements CommissionService {
     @Override
     @Transactional(readOnly = true)
     public CollectionModel<CommissionDto> findAllByCurrentEmployeeUser(Integer page, Integer size) {
-        EmployeeDto currentEmployeeUser = employeeService.findCurrentEmployeeUser();
+        Long employeeId = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getPersonId();
         Pageable pageable = PageRequest.of(page, size);
-        Page<Commission> commissions = commissionRepository.findAllByEmployeeId(currentEmployeeUser.getId(), pageable);
+        Page<Commission> commissions = commissionRepository.findAllByEmployeeId(employeeId, pageable);
         return pagedResourcesAssembler.toModel(commissions, commissionAssembler);
     }
 
@@ -81,8 +84,14 @@ public class CommissionServiceImpl implements CommissionService {
     @Override
     @Transactional
     public CommissionDto update(CommissionDto commissionDto, String id) {
+        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         Commission commissionToUpdate = commissionRepository.findCommissionById(id)
                 .orElseThrow(() -> new NotFoundException("Commission was not found", id));
+
+        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
+        if (!(commissionToUpdate.getEmployeeId() == userData.getPersonId()))
+            throw new AccessDeniedException("Forbidden");
+
         commissionToUpdate.setAssignedAmount(commissionDto.getAssignedAmount());
         commissionToUpdate.setPlace(commissionDto.getPlace());
         commissionToUpdate.setType(commissionDto.getType());
@@ -93,8 +102,14 @@ public class CommissionServiceImpl implements CommissionService {
     @Override
     @Transactional
     public void delete(String id) {
-        if (!commissionRepository.existsById(id))
-            throw new NotFoundException("Requested resource was not found", id);
+        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        Commission commissionToDelete = commissionRepository.findCommissionById(id)
+                .orElseThrow(() -> new NotFoundException("Commission not found", id));
+
+        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
+        if (!(commissionToDelete.getEmployeeId() == userData.getPersonId()))
+            throw new AccessDeniedException("Forbidden");
+
         commissionRepository.deleteById(id);
     }
 
