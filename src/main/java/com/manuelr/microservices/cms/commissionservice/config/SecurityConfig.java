@@ -1,4 +1,4 @@
-package com.manuelr.microservices.cms.commissionservice.security;
+package com.manuelr.microservices.cms.commissionservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

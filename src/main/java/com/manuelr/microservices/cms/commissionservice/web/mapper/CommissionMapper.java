@@ -1,4 +1,4 @@
-package com.manuelr.microservices.cms.commissionservice.mapper;
+package com.manuelr.microservices.cms.commissionservice.web.mapper;
 
 import com.manuelr.cms.commons.dto.CommissionDto;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;

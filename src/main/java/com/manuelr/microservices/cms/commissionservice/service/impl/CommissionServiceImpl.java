@@ -1,7 +1,6 @@
 package com.manuelr.microservices.cms.commissionservice.service.impl;
 
 import com.manuelr.cms.commons.dto.CommissionDto;
-import com.manuelr.cms.commons.dto.EmployeeDto;
 import com.manuelr.cms.commons.enums.Role;
 import com.manuelr.cms.commons.security.UserData;
 import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
@@ -10,8 +9,8 @@ import com.manuelr.microservices.cms.commissionservice.entity.Commission;
 import com.manuelr.microservices.cms.commissionservice.exception.NotFoundException;
 import com.manuelr.microservices.cms.commissionservice.service.EmployeeService;
 import com.manuelr.microservices.cms.commissionservice.service.CommissionService;
-import com.manuelr.microservices.cms.commissionservice.assembler.CommissionAssembler;
-import com.manuelr.microservices.cms.commissionservice.mapper.CommissionMapper;
+import com.manuelr.microservices.cms.commissionservice.web.assembler.CommissionAssembler;
+import com.manuelr.microservices.cms.commissionservice.web.mapper.CommissionMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -76,55 +75,65 @@ public class CommissionServiceImpl implements CommissionService {
     public CommissionDto create(CommissionDto commissionDto) {
         employeeService.findById(commissionDto.getEmployeeId());
         Commission commissionToSave = commissionMapper.commissionDtoToCommission(commissionDto);
-        validateCommission(commissionToSave);
+//        validateCommission(commissionToSave);
         Commission commission = commissionRepository.save(commissionToSave);
         return commissionAssembler.toModel(commission);
     }
 
     @Override
-    @Transactional
     public CommissionDto update(CommissionDto commissionDto, String id) {
-        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        Commission commissionToUpdate = commissionRepository.findCommissionById(id)
-                .orElseThrow(() -> new NotFoundException("Commission was not found", id));
-
-        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
-        if (!(commissionToUpdate.getEmployeeId() == userData.getPersonId()))
-            throw new AccessDeniedException("Forbidden");
-
-        commissionToUpdate.setAssignedAmount(commissionDto.getAssignedAmount());
-        commissionToUpdate.setPlace(commissionDto.getPlace());
-        commissionToUpdate.setType(commissionDto.getType());
-        validateCommission(commissionToUpdate);
-        return commissionAssembler.toModel(commissionRepository.save(commissionToUpdate));
+        return null;
     }
 
     @Override
-    @Transactional
     public void delete(String id) {
-        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        Commission commissionToDelete = commissionRepository.findCommissionById(id)
-                .orElseThrow(() -> new NotFoundException("Commission not found", id));
 
-        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
-        if (!(commissionToDelete.getEmployeeId() == userData.getPersonId()))
-            throw new AccessDeniedException("Forbidden");
-
-        commissionRepository.deleteById(id);
     }
-
-    private void validateCommission(Commission commission) {
-        LocalDate today = LocalDate.now();
-        if (commission.getBeginDate().isBefore(today) || commission.getEndDate().isBefore(today)
-                || commission.getEndDate().isBefore(commission.getBeginDate())) {
-            throw new BadRequestException("Dates are invalid");
-        }
-        Long overlappedCommissions = commissionRepository.existsOverlappedCommissions(
-                commission.getEmployeeId(),
-                commission.getBeginDate(),
-                commission.getEndDate());
-        if (overlappedCommissions >= 1) {
-            throw new BadRequestException("There is a overlap with the dates of another commission");
-        }
-    }
+//
+//    @Override
+//    @Transactional
+//    public CommissionDto update(CommissionDto commissionDto, String id) {
+//        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//        Commission commissionToUpdate = commissionRepository.findCommissionById(id)
+//                .orElseThrow(() -> new NotFoundException("Commission was not found", id));
+//
+//        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
+//        if (!(commissionToUpdate.getEmployeeId() == userData.getPersonId()))
+//            throw new AccessDeniedException("Forbidden");
+//
+//        commissionToUpdate.setAssignedAmount(commissionDto.getAssignedAmount());
+//        commissionToUpdate.setPlace(commissionDto.getPlace());
+//        commissionToUpdate.setType(commissionDto.getType());
+//        validateCommission(commissionToUpdate);
+//        return commissionAssembler.toModel(commissionRepository.save(commissionToUpdate));
+//    }
+//
+//    @Override
+//    @Transactional
+//    public void delete(String id) {
+//        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//        Commission commissionToDelete = commissionRepository.findCommissionById(id)
+//                .orElseThrow(() -> new NotFoundException("Commission not found", id));
+//
+//        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
+//        if (!(commissionToDelete.getEmployeeId() == userData.getPersonId()))
+//            throw new AccessDeniedException("Forbidden");
+//
+//        commissionRepository.deleteById(id);
+//    }
+//
+//    private void validateCommission(Commission commission) {
+//        LocalDate today = LocalDate.now();
+//        if (commission.getBeginDate().isBefore(today) || commission.getEndDate().isBefore(today)
+//                || commission.getEndDate().isBefore(commission.getBeginDate())) {
+//            throw new BadRequestException("Dates are invalid");
+//        }
+//        Long overlappedCommissions = commissionRepository.existsOverlappedCommissions(
+//                commission.getEmployeeId(),
+//                commission.getBeginDate(),
+//                commission.getEndDate());
+//        if (overlappedCommissions >= 1) {
+//            throw new BadRequestException("There is a overlap with the dates of another commission");
+//        }
+//    }
 }

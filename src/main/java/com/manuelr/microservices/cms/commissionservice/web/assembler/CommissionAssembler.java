@@ -1,12 +1,12 @@
-package com.manuelr.microservices.cms.commissionservice.assembler;
+package com.manuelr.microservices.cms.commissionservice.web.assembler;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.manuelr.cms.commons.dto.CommissionDto;
 import com.manuelr.microservices.cms.commissionservice.controller.CommissionController;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
-import com.manuelr.microservices.cms.commissionservice.mapper.CommissionMapper;
-import com.manuelr.microservices.cms.commissionservice.proxy.EmployeeServiceFeignClient;
+import com.manuelr.microservices.cms.commissionservice.web.mapper.CommissionMapper;
+import com.manuelr.microservices.cms.commissionservice.web.proxy.EmployeeServiceFeignClient;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -24,7 +24,7 @@ public class CommissionAssembler implements RepresentationModelAssembler<Commiss
         commissionDto.add(linkTo(methodOn(CommissionController.class).findAll(0, 8)).withRel("commissions"));
         commissionDto.add(linkTo(methodOn(CommissionController.class).update(commissionDto, entity.getId())).withRel("update"));
         commissionDto.add(linkTo(methodOn(CommissionController.class).delete(entity.getId())).withRel("delete"));
-        commissionDto.add(linkTo(methodOn(EmployeeServiceFeignClient.class).findById(entity.getEmployeeId())).withRel("commissionEmployee"));
+//        commissionDto.add(linkTo(methodOn(EmployeeServiceFeignClient.class).findById(entity.getEmployeeId())).withRel("commissionEmployee"));
         return commissionDto;
     }
 

@@ -1,4 +1,4 @@
-package com.manuelr.microservices.cms.commissionservice.interceptor;
+package com.manuelr.microservices.cms.commissionservice.web.interceptor;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;

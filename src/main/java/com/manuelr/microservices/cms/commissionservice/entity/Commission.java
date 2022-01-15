@@ -27,8 +27,8 @@ public class Commission {
     @Id
     private String id;
 
-    @NotNull
-    private Long employeeId;
+    @DBRef
+    private Employee employee;
 
     @NotNull
     private CommissionType type;

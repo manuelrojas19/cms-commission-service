@@ -1,4 +1,4 @@
-package com.manuelr.microservices.cms.commissionservice.security;
+package com.manuelr.microservices.cms.commissionservice.config;
 
 import com.manuelr.cms.commons.security.SecurityCipher;
 import com.manuelr.cms.commons.security.UserData;
