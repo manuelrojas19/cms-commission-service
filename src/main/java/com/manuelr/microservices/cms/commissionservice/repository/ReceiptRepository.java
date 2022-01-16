@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReceiptRepository extends MongoRepository<Receipt, String> {
+    Page<Receipt> findAllByCommission(Commission commission, Pageable pageable);
     Page<Receipt> findAllByCommission_Id(String commissionId, Pageable pageable);
 }

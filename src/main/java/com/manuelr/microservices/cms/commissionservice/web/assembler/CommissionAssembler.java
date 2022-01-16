@@ -22,9 +22,7 @@ public class CommissionAssembler implements RepresentationModelAssembler<Commiss
         CommissionDto commissionDto = commissionMapper.commissionToCommissionDto(entity);
         commissionDto.add(linkTo(methodOn(CommissionController.class).findById(entity.getId())).withSelfRel());
         commissionDto.add(linkTo(methodOn(CommissionController.class).findAll(0, 8)).withRel("commissions"));
-        commissionDto.add(linkTo(methodOn(CommissionController.class).update(commissionDto, entity.getId())).withRel("update"));
         commissionDto.add(linkTo(methodOn(CommissionController.class).delete(entity.getId())).withRel("delete"));
-//        commissionDto.add(linkTo(methodOn(EmployeeServiceFeignClient.class).findById(entity.getEmployeeId())).withRel("commissionEmployee"));
         return commissionDto;
     }
 

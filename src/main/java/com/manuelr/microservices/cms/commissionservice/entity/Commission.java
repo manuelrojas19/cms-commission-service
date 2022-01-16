@@ -17,7 +17,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -44,9 +45,6 @@ public class Commission {
 
     @Null
     private Boolean managerApproval;
-
-    @Null
-    private Boolean financeApproval;
 
     @Null
     private BigDecimal assignedAmount;

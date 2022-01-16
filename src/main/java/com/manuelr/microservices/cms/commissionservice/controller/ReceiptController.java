@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class ReceiptController {
     private static final String DEFAULT_PAGE_NUMBER = "0";
     private static final String DEFAULT_PAGE_SIZE = "8";
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/receipts")
     public ResponseEntity<CollectionModel<ReceiptDto>> findAll(
             @RequestParam(name = "page", required = false, defaultValue = DEFAULT_PAGE_NUMBER) Integer page,
@@ -26,6 +28,7 @@ public class ReceiptController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('EMPLOYEE') or hasAuthority('MANAGER')")
     @GetMapping("/commissions/{commissionId}/receipts")
     public ResponseEntity<CollectionModel<ReceiptDto>> findAllByEmployeeId(
             @RequestParam(name = "page", required = false, defaultValue = DEFAULT_PAGE_NUMBER) Integer page,
@@ -35,6 +38,7 @@ public class ReceiptController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
     @PostMapping("/receipts")
     public ResponseEntity<ReceiptDto> create(@Validated @RequestBody ReceiptDto request) {
         ReceiptDto response = receiptService.create(request);

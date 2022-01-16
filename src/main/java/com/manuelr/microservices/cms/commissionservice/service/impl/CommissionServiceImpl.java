@@ -1,14 +1,14 @@
 package com.manuelr.microservices.cms.commissionservice.service.impl;
 
 import com.manuelr.cms.commons.dto.CommissionDto;
-import com.manuelr.cms.commons.enums.Role;
 import com.manuelr.cms.commons.security.UserData;
+import com.manuelr.microservices.cms.commissionservice.entity.Employee;
 import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
 import com.manuelr.microservices.cms.commissionservice.repository.CommissionRepository;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
 import com.manuelr.microservices.cms.commissionservice.exception.NotFoundException;
-import com.manuelr.microservices.cms.commissionservice.service.EmployeeService;
 import com.manuelr.microservices.cms.commissionservice.service.CommissionService;
+import com.manuelr.microservices.cms.commissionservice.service.EmployeeService;
 import com.manuelr.microservices.cms.commissionservice.web.assembler.CommissionAssembler;
 import com.manuelr.microservices.cms.commissionservice.web.mapper.CommissionMapper;
 import lombok.AllArgsConstructor;
@@ -18,12 +18,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 @Slf4j
 @Service
@@ -41,24 +43,28 @@ public class CommissionServiceImpl implements CommissionService {
     public CollectionModel<CommissionDto> findAll(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Commission> commissions = commissionRepository.findAll(pageable);
+        if (commissions.isEmpty()) throw new NotFoundException("Commissions not found", "0");
         log.info("Retrieve data ---> {}", commissions.getContent());
         return pagedResourcesAssembler.toModel(commissions, commissionAssembler);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CollectionModel<CommissionDto> findAllByEmployeeId(Long employeeId, Integer page, Integer size) {
+    public CollectionModel<CommissionDto> findAllByEmployee(Long employeePersonId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Commission> commissions = commissionRepository.findAllByEmployeeId(employeeId, pageable);
+        Employee employee = employeeService.findByPersonId(employeePersonId);
+        Page<Commission> commissions = commissionRepository.findAllByEmployee(employee, pageable);
+        if (commissions.isEmpty()) throw new NotFoundException("Commissions not found", "0");
         return pagedResourcesAssembler.toModel(commissions, commissionAssembler);
     }
 
     @Override
     @Transactional(readOnly = true)
     public CollectionModel<CommissionDto> findAllByCurrentEmployeeUser(Integer page, Integer size) {
-        Long employeeId = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getPersonId();
         Pageable pageable = PageRequest.of(page, size);
-        Page<Commission> commissions = commissionRepository.findAllByEmployeeId(employeeId, pageable);
+        Employee employee = employeeService.findCurrentEmployeeUser();
+        Page<Commission> commissions = commissionRepository.findAllByEmployee(employee, pageable);
+        if (commissions.isEmpty()) throw new NotFoundException("Commissions not found", "0");
         return pagedResourcesAssembler.toModel(commissions, commissionAssembler);
     }
 
@@ -73,67 +79,59 @@ public class CommissionServiceImpl implements CommissionService {
     @Override
     @Transactional
     public CommissionDto create(CommissionDto commissionDto) {
-        employeeService.findById(commissionDto.getEmployeeId());
-        Commission commissionToSave = commissionMapper.commissionDtoToCommission(commissionDto);
-//        validateCommission(commissionToSave);
-        Commission commission = commissionRepository.save(commissionToSave);
-        return commissionAssembler.toModel(commission);
+        Long employeePersonId = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getPersonId();
+        Employee employee = employeeService.findByPersonId(employeePersonId);
+        Commission commission = commissionMapper.commissionDtoToCommission(commissionDto);
+        validateCommission(commission, employee);
+        commission.setEmployee(employee);
+        return commissionAssembler.toModel(commissionRepository.save(commission));
     }
 
     @Override
-    public CommissionDto update(CommissionDto commissionDto, String id) {
-        return null;
-    }
-
-    @Override
+    @Transactional
     public void delete(String id) {
+        Commission commission = commissionRepository.findCommissionById(id)
+                .orElseThrow(() -> new NotFoundException("Commission was not found", id));
+        commissionRepository.delete(commission);
+    }
+
+    @Override
+    public void approveByManager(String id) {
+        Commission commission = commissionRepository.findCommissionById(id)
+                .orElseThrow(() -> new NotFoundException("Commission was not found", id));
+        if (Objects.nonNull(commission.getManagerApproval()) &&
+                commission.getManagerApproval() == true)
+            throw new BadRequestException("The commission is already approved");
+        commission.setManagerApproval(true);
+        commissionRepository.save(commission);
 
     }
-//
-//    @Override
-//    @Transactional
-//    public CommissionDto update(CommissionDto commissionDto, String id) {
-//        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-//        Commission commissionToUpdate = commissionRepository.findCommissionById(id)
-//                .orElseThrow(() -> new NotFoundException("Commission was not found", id));
-//
-//        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
-//        if (!(commissionToUpdate.getEmployeeId() == userData.getPersonId()))
-//            throw new AccessDeniedException("Forbidden");
-//
-//        commissionToUpdate.setAssignedAmount(commissionDto.getAssignedAmount());
-//        commissionToUpdate.setPlace(commissionDto.getPlace());
-//        commissionToUpdate.setType(commissionDto.getType());
-//        validateCommission(commissionToUpdate);
-//        return commissionAssembler.toModel(commissionRepository.save(commissionToUpdate));
-//    }
-//
-//    @Override
-//    @Transactional
-//    public void delete(String id) {
-//        UserData userData = ((UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-//        Commission commissionToDelete = commissionRepository.findCommissionById(id)
-//                .orElseThrow(() -> new NotFoundException("Commission not found", id));
-//
-//        if (!(userData.getRole().equals(Role.EMPLOYEE))) throw new AccessDeniedException("Forbidden");
-//        if (!(commissionToDelete.getEmployeeId() == userData.getPersonId()))
-//            throw new AccessDeniedException("Forbidden");
-//
-//        commissionRepository.deleteById(id);
-//    }
-//
-//    private void validateCommission(Commission commission) {
-//        LocalDate today = LocalDate.now();
-//        if (commission.getBeginDate().isBefore(today) || commission.getEndDate().isBefore(today)
-//                || commission.getEndDate().isBefore(commission.getBeginDate())) {
-//            throw new BadRequestException("Dates are invalid");
-//        }
-//        Long overlappedCommissions = commissionRepository.existsOverlappedCommissions(
-//                commission.getEmployeeId(),
-//                commission.getBeginDate(),
-//                commission.getEndDate());
-//        if (overlappedCommissions >= 1) {
-//            throw new BadRequestException("There is a overlap with the dates of another commission");
-//        }
-//    }
+
+    private void validateCommission(Commission commission, Employee employee) {
+        if (!validateDates(commission.getBeginDate(), commission.getEndDate())) {
+            throw new BadRequestException("Dates are invalid");
+        }
+        List<Commission> commissions = commissionRepository.findAllByEmployee(employee);
+        log.info("Commissions by the user --> {}", commissions);
+        if (commissions.stream().anyMatch(betweenCommissionDatesPredicate(commission.getBeginDate(), commission.getEndDate()))) {
+            throw new BadRequestException("There is a overlap with the dates of another commission");
+        }
+    }
+
+    private boolean validateDates(LocalDate begin, LocalDate end) {
+        LocalDate today = LocalDate.now();
+        return !(begin.isBefore(today) || end.isBefore(today) || end.isBefore(begin));
+    }
+
+    private Predicate<Commission> betweenCommissionDatesPredicate(LocalDate beginDate, LocalDate endDate) {
+        return c -> dateIsBetween(beginDate, c.getBeginDate(), c.getEndDate()) ||
+                dateIsBetween(endDate, c.getBeginDate(), c.getEndDate()) ||
+                dateIsBetween(c.getBeginDate(), beginDate, endDate) ||
+                dateIsBetween(c.getEndDate(), beginDate, endDate);
+    }
+
+    private boolean dateIsBetween(LocalDate date, LocalDate begin, LocalDate end) {
+        return (date.isAfter(begin) || date.isEqual(begin))
+                && (date.isBefore(end) || date.isEqual(end));
+    }
 }
