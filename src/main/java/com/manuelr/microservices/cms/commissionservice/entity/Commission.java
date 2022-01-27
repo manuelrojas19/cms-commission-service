@@ -2,6 +2,7 @@ package com.manuelr.microservices.cms.commissionservice.entity;
 
 import com.manuelr.cms.commons.enums.CommissionType;
 import com.manuelr.cms.commons.utils.Place;
+import com.manuelr.microservices.cms.commissionservice.enums.ApprovalStatus;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -44,7 +45,7 @@ public class Commission {
     private LocalDate endDate;
 
     @Null
-    private Boolean managerApproval;
+    private ApprovalStatus managerApprovalStatus = ApprovalStatus.PENDING;
 
     @Null
     private BigDecimal assignedAmount;

@@ -3,6 +3,8 @@ package com.manuelr.microservices.cms.commissionservice.service.impl;
 import com.manuelr.microservices.cms.commissionservice.dto.ReceiptDto;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
 import com.manuelr.microservices.cms.commissionservice.entity.Receipt;
+import com.manuelr.microservices.cms.commissionservice.enums.ApprovalStatus;
+import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
 import com.manuelr.microservices.cms.commissionservice.exception.NotFoundException;
 import com.manuelr.microservices.cms.commissionservice.repository.CommissionRepository;
 import com.manuelr.microservices.cms.commissionservice.repository.ReceiptRepository;
@@ -40,10 +42,12 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public CollectionModel<ReceiptDto> findAllByCommissionId(String commissionId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Receipt> receipts = receiptRepository.findAllByCommission_Id(commissionId, pageable);
-        log.info("Retrieve data ---> {}", receipts.getContent());
+    @Transactional(readOnly = true)
+    public CollectionModel<ReceiptDto> findAllByCommission(String commissionId, Integer page, Integer size) {
+        Commission commission = commissionRepository.findCommissionById(commissionId)
+                .orElseThrow(() -> new NotFoundException("Commission was not found", commissionId));
+        Page<Receipt> receipts = receiptRepository.findAllByCommission(commission, PageRequest.of(page, size));
+        if (receipts.isEmpty()) throw new NotFoundException("There are not commissions", "1");
         return pagedResourcesAssembler.toModel(receipts, receiptAssembler);
     }
 
@@ -52,6 +56,8 @@ public class ReceiptServiceImpl implements ReceiptService {
     public ReceiptDto create(ReceiptDto receipt) {
         Commission commission = commissionRepository.findCommissionById(receipt.getCommissionId())
                 .orElseThrow(() -> new NotFoundException("Commission was not found", receipt.getCommissionId()));
+        if (!commission.getManagerApprovalStatus().equals(ApprovalStatus.AUTHORIZED))
+            throw new BadRequestException("The commission must be authorized to create receipts");
         Receipt receiptToSave = receiptMapper.receiptDtoToReceipt(receipt);
         receiptToSave.setCommission(commission);
         return receiptAssembler.toModel(receiptRepository.save(receiptToSave));

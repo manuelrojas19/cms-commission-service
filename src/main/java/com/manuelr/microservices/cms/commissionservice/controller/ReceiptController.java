@@ -34,7 +34,7 @@ public class ReceiptController {
             @RequestParam(name = "page", required = false, defaultValue = DEFAULT_PAGE_NUMBER) Integer page,
             @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer size,
             @PathVariable String commissionId) {
-        CollectionModel<ReceiptDto> response = receiptService.findAllByCommissionId(commissionId, page, size);
+        CollectionModel<ReceiptDto> response = receiptService.findAllByCommission(commissionId, page, size);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Service;
 
 public interface ReceiptService {
     CollectionModel<ReceiptDto> findAll(Integer page, Integer size);
-    CollectionModel<ReceiptDto> findAllByCommissionId(String commissionId, Integer page, Integer size);
+    CollectionModel<ReceiptDto> findAllByCommission(String commissionId, Integer page, Integer size);
     ReceiptDto create(ReceiptDto receipt);
 }

@@ -3,6 +3,7 @@ package com.manuelr.microservices.cms.commissionservice.service.impl;
 import com.manuelr.cms.commons.dto.CommissionDto;
 import com.manuelr.cms.commons.security.UserData;
 import com.manuelr.microservices.cms.commissionservice.entity.Employee;
+import com.manuelr.microservices.cms.commissionservice.enums.ApprovalStatus;
 import com.manuelr.microservices.cms.commissionservice.exception.BadRequestException;
 import com.manuelr.microservices.cms.commissionservice.repository.CommissionRepository;
 import com.manuelr.microservices.cms.commissionservice.entity.Commission;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 @Slf4j
@@ -96,26 +96,26 @@ public class CommissionServiceImpl implements CommissionService {
     }
 
     @Override
+    @Transactional
     public void approveByManager(String id) {
         Commission commission = commissionRepository.findCommissionById(id)
                 .orElseThrow(() -> new NotFoundException("Commission was not found", id));
-        if (Objects.nonNull(commission.getManagerApproval()) &&
-                commission.getManagerApproval() == true)
+        if (commission.getManagerApprovalStatus().equals(ApprovalStatus.REJECTED))
+            throw new BadRequestException("The commission has ben rejected");
+        if (commission.getManagerApprovalStatus().equals(ApprovalStatus.AUTHORIZED))
             throw new BadRequestException("The commission is already approved");
-        commission.setManagerApproval(true);
+        commission.setManagerApprovalStatus(ApprovalStatus.AUTHORIZED);
         commissionRepository.save(commission);
-
     }
 
     private void validateCommission(Commission commission, Employee employee) {
-        if (!validateDates(commission.getBeginDate(), commission.getEndDate())) {
+        if (!validateDates(commission.getBeginDate(), commission.getEndDate()))
             throw new BadRequestException("Dates are invalid");
-        }
         List<Commission> commissions = commissionRepository.findAllByEmployee(employee);
         log.info("Commissions by the user --> {}", commissions);
-        if (commissions.stream().anyMatch(betweenCommissionDatesPredicate(commission.getBeginDate(), commission.getEndDate()))) {
+        if (commissions.stream().anyMatch(betweenCommissionDatesPredicate(commission.getBeginDate(),
+                commission.getEndDate())))
             throw new BadRequestException("There is a overlap with the dates of another commission");
-        }
     }
 
     private boolean validateDates(LocalDate begin, LocalDate end) {
