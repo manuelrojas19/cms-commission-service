@@ -1,4 +1,4 @@
-package com.manuelr.microservices.cms.commissionservice.config;
+package com.manuelr.microservices.cms.commissionservice.event.handler;
 
 import com.manuelr.microservices.cms.commissionservice.entity.Employee;
 import com.manuelr.microservices.cms.commissionservice.entity.Manager;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.function.Consumer;
 
 @Configuration
-public class SignupPersonHandler {
+public class RegistrationEventHandler {
 
     @Autowired
     private ManagerRepository managerRepository;
@@ -28,7 +28,7 @@ public class SignupPersonHandler {
     @Transactional
     public void savePerson(Person person, Long managerId, Consumer<Person> personConsumer) {
         Manager manager = managerRepository.findByPersonId(managerId)
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(RuntimeException::new);
         Employee employee = (Employee) person;
         employee.setManager(manager);
         personConsumer.andThen(this::savePerson).accept(employee);

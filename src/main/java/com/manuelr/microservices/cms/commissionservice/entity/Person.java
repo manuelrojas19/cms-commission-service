@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
-
+import org.springframework.data.mongodb.core.index.Indexed;
 
 @Getter
 @Setter
@@ -13,5 +13,6 @@ public abstract class Person {
     @Id
     private String id;
 
+    @Indexed(unique=true)
     private Long personId;
 }

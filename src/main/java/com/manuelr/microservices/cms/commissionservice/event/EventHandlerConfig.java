@@ -1,9 +1,10 @@
-package com.manuelr.microservices.cms.commissionservice.config;
+package com.manuelr.microservices.cms.commissionservice.event;
 
 import com.manuelr.cms.commons.dto.EmployeeDto;
 import com.manuelr.cms.commons.dto.ManagerDto;
 import com.manuelr.cms.commons.dto.PersonDto;
 import com.manuelr.cms.commons.event.registration.RegistrationEvent;
+import com.manuelr.microservices.cms.commissionservice.event.handler.RegistrationEventHandler;
 import com.manuelr.microservices.cms.commissionservice.entity.Employee;
 import com.manuelr.microservices.cms.commissionservice.entity.Manager;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
 public class EventHandlerConfig {
 
     @Autowired
-    private SignupPersonHandler handler;
+    private RegistrationEventHandler handler;
 
     @Bean
     public Consumer<RegistrationEvent> registrationEventConsumer() {
