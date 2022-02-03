@@ -1,3 +1,6 @@
+spring:
+  application:
+    name: commission-service
 authentication-dev:
   auth:
     tokenSecret: myTokenSecret
