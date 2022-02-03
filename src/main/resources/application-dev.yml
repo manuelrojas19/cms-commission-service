@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: commissions-service
+  data:
+    mongodb:
+      database: commissions_service_db
+      port: 27017
+      auto-index-creation: true
+  cloud:
+    config:
+      enabled: false
+      discovery:
+        enabled: false
+    stream:
+      function:
+        definition: registrationEventConsumer
+      bindings:
+        registrationEventConsumer-in-0:
+          destination: registration-event
+  zipkin:
+    base-url: http://localhost:9411
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+server:
+  port: 8201
+  forward-headers-strategy: framework
+
